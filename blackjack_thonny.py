@@ -8,10 +8,11 @@ def crear_baraja():
     baraja = []
     for palo in palos:
         for valor in valores:
-            baraja.append((valor, palo))
+            baraja.append((valor, palo))     
     random.shuffle(baraja)
     return baraja
-
+# 1. FUNCIÓN valor_carta: Traduce el valor textual de cada carta individual a su equivalente numérico 
+#para las reglas del juego (las figuras valen 10, el As vale temporalmente 11 y las numéricas se convierten a entero).
 def valor_carta(carta):
     valor = carta[0]
     if valor in ("J", "Q", "K"):
@@ -19,17 +20,18 @@ def valor_carta(carta):
     if valor == "A":
         return 11
     return int(valor)
-
+# 2. FUNCIÓN calcular_puntos: Suma los puntos de toda una mano y controla de forma inteligente el valor del As,
+# reduciéndolo de 11 a 1 mediante restas de 10 si el total excede los 21 puntos.
 def calcular_puntos(mano):
     total = 0
     cantidad_ases = 0
     for carta in mano:
         total += valor_carta(carta)
         if carta[0] == "A":
-            cantidad_ases += 1
+            cantidad_ases += 1      
     while total > 21 and cantidad_ases > 0:
         total -= 10
-        cantidad_ases -= 1
+        cantidad_ases -= 1    
     return total
 
 def texto_carta(carta):
@@ -41,9 +43,9 @@ def mostrar_mano(mano, ocultar_primera=False):
             print("  [Carta oculta]")
         else:
             print("  ", texto_carta(carta))
-
+# 3. FUNCIÓN pedir_decision: Asegura la interacción robusta con el usuario al forzar un ciclo infinito 
+#hasta que se ingrese una opción correcta ('P' para pedir carta o 'Q' para quedarse), normalizando mayúsculas y espacios.
 def pedir_decision():
-
     while True:
         opcion = input("Desea [P]edir carta o [Q]uedarse (Ingrese P ó Q acorde su elección)? ").strip().upper() #Necesario poner mayuscula y eliminar espacios
         if opcion in ("P", "Q"):
@@ -52,15 +54,12 @@ def pedir_decision():
 
 def solicitar_apuesta(fichas_actuales, nombre_jugador):
     while True:
-        try:
             print("Fichas disponibles: {",fichas_actuales,"}")
             print("")
             apuesta = int(input(f"{nombre_jugador}, ¿Cuántas fichas desea apostar? "))
             if 1 <= apuesta <= fichas_actuales:
                 return apuesta
             print("Apuesta inválida. Debe ser entre 1 y {",fichas_actuales,"} fichas.")
-        except ValueError:
-            print("Por favor, ingrese un número entero válido.")
 
 def turno_jugador(baraja, mano_jugador, nombre_jugador):
     while True:
@@ -70,10 +69,10 @@ def turno_jugador(baraja, mano_jugador, nombre_jugador):
         mostrar_mano(mano_jugador)
         print("Puntos:", puntos)
         if puntos >= 21:
-            return puntos
-        decision = pedir_decision()
+            return puntos            
+        decision = pedir_decision()        
         if decision == "Q":
-            return puntos
+            return puntos            
         carta = baraja.pop()
         mano_jugador.append(carta)
         print("Recibió:", texto_carta(carta))
@@ -85,11 +84,12 @@ def turno_casa(baraja, mano_casa):
     while calcular_puntos(mano_casa) < 17:
         carta = baraja.pop()
         mano_casa.append(carta)
-        print("La casa recibe:", texto_carta(carta))
+        print("La casa recibe:", texto_carta(carta))        
     puntos = calcular_puntos(mano_casa)
     print("Puntos de la casa:", puntos)
     return puntos
-
+# 4. FUNCIÓN determinar_resultado: Compara de manera lógica los puntajes finales entre el usuario y la casa 
+#(evaluando previamente si alguno superó el límite de 21) para retornar un texto descriptivo con el ganador de la partida.
 def determinar_resultado(puntos_jugador, puntos_casa, nombre_jugador):
     if puntos_jugador > 21:
         return f" Lastima, {nombre_jugador} pierde: A superado los 21 puntos."
@@ -100,7 +100,8 @@ def determinar_resultado(puntos_jugador, puntos_casa, nombre_jugador):
     if puntos_jugador < puntos_casa:
         return "La CASA Gana."
     return "Empate."
-
+# 5. FUNCIÓN es_blackjack: Valida de forma concisa si una mano en específico cumple con la condición estricta de Blackjack
+# inicial en el juego (constar exactamente de dos cartas cuya suma total sea 21).
 def es_blackjack(mano):
     return len(mano) == 2 and calcular_puntos(mano) == 21
 
@@ -108,11 +109,11 @@ def jugar_ronda(nombre_jugador, datos_juego):
     if datos_juego['fichas'] <= 0:
         print("\n¡Te has quedado sin fichas! Lastima es el fin del juego, reinicia el juego para mas credito.")
         return False
-    apuesta = solicitar_apuesta(datos_juego['fichas'], nombre_jugador)
+    apuesta = solicitar_apuesta(datos_juego['fichas'], nombre_jugador)    
     baraja = crear_baraja()
     mano_jugador = [baraja.pop(), baraja.pop()]
     mano_casa = [baraja.pop(), baraja.pop()]
-
+    
     print("")
     print("BLACKJACK PYTHON (Modificando el código Vrs.Grupo)")
     print("")
@@ -120,12 +121,12 @@ def jugar_ronda(nombre_jugador, datos_juego):
     print("Cartas en la baraja: {",len(baraja),"}")
     print("")
     print("Casa:")
-    mostrar_mano(mano_casa, ocultar_primera=True)
+    mostrar_mano(mano_casa, ocultar_primera=True)    
     print(f"\n{nombre_jugador}:")
     mostrar_mano(mano_jugador)
-    print("Puntos:", calcular_puntos(mano_jugador))
+    print("Puntos:", calcular_puntos(mano_jugador))    
     jugador_blackjack = es_blackjack(mano_jugador)
-    casa_blackjack = es_blackjack(mano_casa)
+    casa_blackjack = es_blackjack(mano_casa)    
     if jugador_blackjack or casa_blackjack:
         print("")
         print("Existe Blackjack inicial (21 Puntos)")
@@ -142,20 +143,20 @@ def jugar_ronda(nombre_jugador, datos_juego):
             print("Resultado: Blackjack de la casa. Gana la casa (Es una Lastima, pero tendras más oportunidades).")
             datos_juego['casa'] += 1
             datos_juego['fichas'] -= apuesta
-        return True
+        return True        
     puntos_jugador = turno_jugador(baraja, mano_jugador, nombre_jugador)
     if puntos_jugador > 21:
         print("\nResultado:", determinar_resultado(puntos_jugador, 0, nombre_jugador))
         datos_juego['casa'] += 1
         datos_juego['fichas'] -= apuesta
-        return True
-    puntos_casa = turno_casa(baraja, mano_casa)
+        return True        
+    puntos_casa = turno_casa(baraja, mano_casa)    
     print
     print("Resultado final")
     print(f"El jugador: {nombre_jugador}, quedó con:", puntos_jugador, "puntos")
-    print("La Casa quedó con:", puntos_casa, "puntos")
+    print("La Casa quedó con:", puntos_casa, "puntos")    
     resultado = determinar_resultado(puntos_jugador, puntos_casa, nombre_jugador)
-    print("Resultado:", resultado)
+    print("Resultado:", resultado)    
     if f"Gana {nombre_jugador}" in resultado:
         datos_juego['jugador'] += 1
         datos_juego['fichas'] += apuesta
@@ -188,14 +189,14 @@ def main():
         print(" Las Fichas actuales: {",datos_juego['fichas'],"}")
         print("Marcador -> {",nombre_jugador,"}: {",datos_juego['jugador'],"} | Casa: {",datos_juego['casa'],"} | Empates: {",datos_juego['empates'],"}")
         print("-" * 28)
-
+        
         if datos_juego['fichas'] <= 0:
             print("LASTIMA, Te has quedado sin fichas. ¡Fin del juego! (Reinica el juego para más credito)")
             break
-        print("")
+        print("") 
         respuesta = input("Desea jugar otra ronda? [S/N]: ").strip().upper()
         while respuesta not in ("S", "N"):
-            respuesta = input("Escriba S para continuar o N para salir (No hay más opciones): ").strip().upper() #Mayusculas y no tomar espacios
+            respuesta = input("Escriba S para continuar o N para salir (No hay más opciones): ").strip().upper() #Mayusculas y no tomar espacios            
         if respuesta == "N":
             print(f"Gracias por jugar, {nombre_jugador}. Te retiras con {datos_juego['fichas']} fichas. ¡Hasta pronto!")
             break
